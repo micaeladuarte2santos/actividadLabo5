@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar Paciente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .alert {
+      padding: 15px;
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: none; /* Hidden by default */
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Agregar Paciente</h2>
+    <!-- Contenedor de mensaje de error -->
+    <div id="alertMessage" class="alert"></div>
+    
+    <form id="pacienteForm">
+      <input type="text" id="dni" placeholder="DNI" required>
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="email" placeholder="Email" required>
+      <input type="text" id="telefono" placeholder="Teléfono" required>
+      <button type="submit">Guardar</button>
+      <div class="message" id="message"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('pacienteForm');
+    const alertMessage = document.getElementById('alertMessage');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const dni = document.getElementById('dni').value;
+      const nombre = document.getElementById('nombre').value;
+      const email = document.getElementById('email').value;
+      const telefono = document.getElementById('telefono').value;
+
+      try {
+        const res = await fetch('/pacientes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `dni=${dni}&nombre=${nombre}&email=${email}&telefono=${telefono}`
+        });
+
+        if (res.ok) {
+          alertMessage.style.display = 'none'; // Oculta el mensaje de error si la operación es exitosa
+          message.style.display = 'block'; // Asegúrate de que el mensaje de éxito sea visible
+          message.style.color = 'green';
+          message.textContent = "Paciente guardado con éxito.";
+          form.reset();
+        } else {
+          const errorText = await res.text();
+          alertMessage.style.display = 'block'; // Muestra el mensaje de error
+          alertMessage.textContent = errorText; // Establece el mensaje de error en el contenedor
+          message.style.display = 'none'; // Oculta el mensaje de éxito, si existía
+        }
+
+      } catch (err) {
+        alertMessage.style.display = 'block';
+        alertMessage.textContent = "Error de conexión al servidor.";
+      }
+    });
+  </script>
+</body>
+</html>
